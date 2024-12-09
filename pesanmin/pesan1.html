@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="shortcut icon" type="x-icon" href="../logo_black.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous" defer></script>
+    <title>PAK PARMAN</title>
+</head>
+<body class="bodyall">
+      <form method="POST" name="contact-form" class="container">
+        <nav class="navbar" style="background-color: #ffffff;">
+          <div class="container-fluid">
+            <a class="navbar-brand" href="../index.html"><img src="../logo_navbar_black.png" width="80"></a>
+            <button type="button" class="btn btn-outline-dark" style="border-radius: 100px;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+                <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+                <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
+              </svg>
+              <i id="msgtext" class="bi bi-geo-alt-fill"></i>
+            </button>
+            <!-- Modal -->
+            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+              <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Pemberitahuan</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>                  
+                  <div class="text-center">
+                  <div class="modal-body">
+                    <div id="messages" style="text-align: left;"></div>                
+                    <script>
+                        module = {};
+                    </script>
+                    <script type="module">
+                        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+                        import { getDatabase, ref, set, remove, onChildAdded, onChildRemoved } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
+                
+                        const firebaseConfig = {
+                    apiKey: "AIzaSyCymLncSTBK9kF06NZChBoaiBPbvtEzeJA",
+                    authDomain: "livechat-fdd9a.firebaseapp.com",
+                    projectId: "livechat-fdd9a",
+                    storageBucket: "livechat-fdd9a.appspot.com",
+                    messagingSenderId: "831613092514",
+                    appId: "1:831613092514:web:48b55e1414913ef7e78dfb"
+                  };
+                
+                        const app = initializeApp(firebaseConfig);
+                        const db = getDatabase(app);
+                
+                        // variables
+                        var msgTxt = document.getElementById('msgTxt');
+                        var sender;
+                        if(sessionStorage.getItem('user-info')){
+                            sender = sessionStorage.getItem('user-info');
+                        } else {
+                            (!sessionStorage.getItem("user-creds"))
+                            window.location.href = '../home.html'
+                        }
+                
+                        // TO SEND MESSAGES
+                        module.sendMsg = function sendMsg(){
+                            var msg = msgTxt.value;
+                            var timestamp = new Date().getTime();
+                            set(ref(db,"messages/"+timestamp),{
+                                msg : msg,
+                                sender : `${UserInfo.firstname}`
+                            })
+                
+                            msgTxt.value="";
+                        }
+                
+                        // TO RECEIVE MSG
+                        onChildAdded(ref(db,"messages"), (data)=>{
+                            if(data.val().sender == `${UserInfo.firstname}`){
+                                messages.innerHTML += "<div style=justify-content:end class=outer id="+data.key+"><div id=inner class=me>you : "+data.val().msg+"<button id=dltMsg onclick=module.dltMsg("+data.key+")>Hapus</button></div></div>";
+                            } else {
+                                messages.innerHTML += "<div class=outer id="+data.key+"><div id=inner class=notMe>"+data.val().sender+" : "+data.val().msg+"</div></div>";
+                            }
+                        })
+                
+                        // TO DELETE MSG
+                        module.dltMsg = function dltMsg(key){
+                            remove(ref(db,"messages/"+key));
+                        }
+                
+                        // WHEN MSG IS DELETED
+                        onChildRemoved(ref(db,"messages"),(data)=>{
+                            var msgBox = document.getElementById(data.key);
+                            messages.removeChild(msgBox);
+                        })
+                    </script>
+                  </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </nav>
+        <div class="counter2">
+        <h1>PAK PARMAN</h1>
+      </div>
+        <div class="counter2" style="text-align: center;">
+          <div class="form-floating mb-3">
+            <select class="form-select" id="floatingSelectGrid" name="JM" required>
+              <option selected disabled value="">Pilih Jenis Mamin ...</option>
+              <option value="Mamin Rapat">Mamin Rapat</option>
+              <option value="Mamin Aklap">Mamin Aktivitas Lapangan</option>
+            </select>
+            <label for="floatingSelectGrid">Jenis Mamin</label>
+          </div>
+          <div class="form-floating mb-3">
+            <input type="number" class="form-control" id="floatingInputJP" name="JP" required>
+            <label for="floatingInputJP">Jumlah Porsi</label>
+        </div>
+        <div class="form-floating mb-3">
+            <input type="number" class="form-control" id="floatingInputHP" name="HP" required>
+            <label for="floatingInputHP">Harga Porsi</label>
+        </div>
+        <div class="form-floating mb-3">
+            <input type="text" class="form-control" style="background-color: lightgreen;" id="floatingInputJML" name="JML" readonly>
+            <label for="floatingInputJML">Jumlah</label>
+        </div>
+        <script>
+          const jpInput = document.getElementById('floatingInputJP');
+          const hpInput = document.getElementById('floatingInputHP');
+          const jmlInput = document.getElementById('floatingInputJML');
+      
+          function calculateJML() {
+              const jp = parseFloat(jpInput.value) || 0; // Get JP value or 0 if empty
+              const hp = parseFloat(hpInput.value) || 0; // Get HP value or 0 if empty
+              const jml = jp * hp; // Calculate JML
+      
+              // Format the number as currency without decimal places
+              const formattedJML = new Intl.NumberFormat('id-ID', {
+                  style: 'currency',
+                  currency: 'IDR',
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0
+              }).format(jml);
+      
+              jmlInput.value = formattedJML; // Set the formatted value to JML
+          }
+      
+          jpInput.addEventListener('input', calculateJML);
+          hpInput.addEventListener('input', calculateJML);
+      </script>
+        <div class="form-floating mb-3">
+          <input type="text" class="form-control" id="floatingInput" name="KGTN" required>
+          <label for="floatingInput">Kegiatan</label>
+        </div>
+          <div class="form-floating mb-3">
+            <input type="date" class="form-control" id="floatingInput" name="TP" required>
+            <label for="floatingInput">Tanggal Pemesanan</label>
+          </div>
+        </div>
+              <script src="../java/pesan1.js">
+              </script>
+              <div class="counter2">
+                <div class="modal fade" id="exampleModalToggle" aria-hidden="true" aria-labelledby="exampleModalToggleLabel" tabindex="-1">
+                  <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalToggleLabel">Mengirim Data Pesanan</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                      <i id="msg"></i><br>
+                        Apakah Data Pesanan Yang dipesan Sudah Benar?
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-dark" data-bs-target="#exampleModalToggle2" data-bs-toggle="modal">Ya</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="modal fade" id="exampleModalToggle2" aria-hidden="true" aria-labelledby="exampleModalToggleLabel2" tabindex="-1">
+                  <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalToggleLabel2">Mengirim Data Pesanan</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        Mengirim data pesanan membutuhkan waktu beberapa detik, Harap Tunggu !
+                      </div>
+                      <div class="modal-footer">
+                        <button type="submit" class="btn btn-dark" data-bs-toggle="modal">Mengirim Pesanan</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <button type="button" class="btn btn-dark btn-lg" data-bs-target="#exampleModalToggle" data-bs-toggle="modal">Mengirim Data Pesanan</button>
+            </div>
+            <nav style="background-color: #ffffff;">
+              <div class="text-center">
+              <div class="container">
+                <img src="../logo_black.png" width="35">
+              </div>
+            </div>
+          </nav>
+        </form>
+    </body>
+    <script>
+      let UserCreds = JSON.parse(sessionStorage.getItem("user-creds"));
+      let UserInfo = JSON.parse(sessionStorage.getItem("user-info"));
+      let SignoutBtn = document.getElementById('signoutbutton');
+      let MsgHead = document.getElementById('msg');  
+      let MsgtextHead = document.getElementById('msgtext');
+      
+      let Signout = ()=>{
+        sessionStorage.removeItem("user-creds");
+        sessionStorage.removeItem("user-info");
+        window.location.href = "../home.html"
+      }
+    
+      let CheckCreds =  ()=>{
+        if (!sessionStorage.getItem("user-creds"))
+        window.location.href = "../home.html"
+        else{
+          MsgHead.innerHTML = `<input type="text" name="PEMESAN" readonly value="${UserInfo.firstname} ${UserInfo.lastname}" style="text-align: center; border:none;">`;
+          MsgtextHead.innerText = `${UserInfo.firstname}`;
+        }
+      }
+    
+      window.addEventListener('load', CheckCreds);
+      SignoutBtn.addEventListener('click', Signout);
+    </script>
+    </html>

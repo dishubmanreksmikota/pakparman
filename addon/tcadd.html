@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="shortcut icon" type="x-icon" href="../logo_black.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous" defer></script>
+    <title>Form TC Add</title>
+</head>
+<body class="bodyall">
+      <form method="POST" name="contact-form" class="container">
+        <nav class="navbar" style="background-color: #ffffff;">
+          <div class="container-fluid">
+            <a class="navbar-brand" href="../index.html"><img src="../logo_navbar_black.png" width="80"></a>
+            <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#exampleModal">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bell-fill" viewBox="0 0 16 16">
+                <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2m.995-14.901a1 1 0 1 0-1.99 0A5 5 0 0 0 3 6c0 1.098-.5 6-2 7h14c-1.5-1-2-5.902-2-7 0-2.42-1.72-4.44-4.005-4.901"/>
+              </svg>
+            </button>
+            <button type="button" class="btn btn-outline-dark" style="border-radius: 100px;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+                <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+                <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
+              </svg>
+              <i id="msgtext" class="bi bi-geo-alt-fill"></i>
+            </button>
+            <!-- Modal -->
+            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+              <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Pemberitahuan</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>                  
+                  <div class="text-center">
+                  <div class="modal-body">
+                    <div id="messages" style="text-align: left;"></div>                
+                    <script>
+                        module = {};
+                    </script>
+                    <script type="module">
+                        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+                        import { getDatabase, ref, set, remove, onChildAdded, onChildRemoved } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
+                
+                        const firebaseConfig = {
+                    apiKey: "AIzaSyCymLncSTBK9kF06NZChBoaiBPbvtEzeJA",
+                    authDomain: "livechat-fdd9a.firebaseapp.com",
+                    projectId: "livechat-fdd9a",
+                    storageBucket: "livechat-fdd9a.appspot.com",
+                    messagingSenderId: "831613092514",
+                    appId: "1:831613092514:web:48b55e1414913ef7e78dfb"
+                  };
+                
+                        const app = initializeApp(firebaseConfig);
+                        const db = getDatabase(app);
+                
+                        // variables
+                        var msgTxt = document.getElementById('msgTxt');
+                        var sender;
+                        if(sessionStorage.getItem('user-info')){
+                            sender = sessionStorage.getItem('user-info');
+                        } else {
+                            (!sessionStorage.getItem("user-creds"))
+                            window.location.href = '../home.html'
+                        }
+                
+                        // TO SEND MESSAGES
+                        module.sendMsg = function sendMsg(){
+                            var msg = msgTxt.value;
+                            var timestamp = new Date().getTime();
+                            set(ref(db,"messages/"+timestamp),{
+                                msg : msg,
+                                sender : `${UserInfo.firstname}`
+                            })
+                
+                            msgTxt.value="";
+                        }
+                
+                        // TO RECEIVE MSG
+                        onChildAdded(ref(db,"messages"), (data)=>{
+                            if(data.val().sender == `${UserInfo.firstname}`){
+                                messages.innerHTML += "<div style=justify-content:end class=outer id="+data.key+"><div id=inner class=me>you : "+data.val().msg+"<button id=dltMsg onclick=module.dltMsg("+data.key+")>Hapus</button></div></div>";
+                            } else {
+                                messages.innerHTML += "<div class=outer id="+data.key+"><div id=inner class=notMe>"+data.val().sender+" : "+data.val().msg+"</div></div>";
+                            }
+                        })
+                
+                        // TO DELETE MSG
+                        module.dltMsg = function dltMsg(key){
+                            remove(ref(db,"messages/"+key));
+                        }
+                
+                        // WHEN MSG IS DELETED
+                        onChildRemoved(ref(db,"messages"),(data)=>{
+                            var msgBox = document.getElementById(data.key);
+                            messages.removeChild(msgBox);
+                        })
+                    </script>
+                  </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </nav>
+        <div class="counter2" style="text-align: center;">
+        <h1>TC Add</h1>
+      </div>
+       <div class="counter2">
+              <div class="form-floating">
+                <select class="form-select" id="floatingSelectGrid" name="ARAH" required>
+                  <option selected disabled value="">Pilih Arah Kendaraan ...</option>
+                  <option value="Masuk">Masuk</option>
+                  <option value="Keluar">Keluar</option>
+                </select>
+                <label for="floatingSelectGrid">Arah Kendaraan</label>
+              </div>
+        </div>
+          <div class="waktu">
+            <label for="WAKTU" class="form-label">Jam Mulai</label><br>
+            <input class="waktuu" type="time" id="DARI" name="DARI" required>  
+          </div>
+        </div>
+        <div class="container text-center">
+          <div class="row row-cols-2">
+                  <div class="col">
+                    <div class="keterangan">Motor</div>
+                  </div>
+                  <div class="col">
+                    <div class="keterangan">Mobil</div>
+                  </div>
+                 <div class="col"><div class="quantity">
+                    <button class="btn btn-outline-danger" type="button" onclick="decrementmotor()">-</button>
+                    <input class="qtyInput" type="number" id="qtyInputMotor" value="0" name="MOTOR">
+                    <button class="btn btn-outline-success" type="button" onclick="incrementmotor()">+</button>
+                  </div></div>
+                  <div class="col"><div class="quantity">                    
+                    <button class="btn btn-outline-danger" type="button" onclick="decrementmobil()">-</button>
+                    <input class="qtyInput" type="number" id="qtyInputMobil" value="0" name="MOBIL">
+                    <button class="btn btn-outline-success" type="button" onclick="incrementmobil()">+</button>
+                  </div></div>
+                  <div class="col">
+                    <div class="keterangan">Angkot</div>
+                  </div>
+                  <div class="col">
+                    <div class="keterangan">PickUp / Box</div>
+                  </div>
+                  <div class="col"><div class="quantity">                    
+                    <button class="btn btn-outline-danger" type="button" onclick="decrementmpu()">-</button>
+                    <input class="qtyInput" type="number" id="qtyInputMPU" value="0" name="MPU">
+                    <button class="btn btn-outline-success" type="button" onclick="incrementmpu()">+</button>
+                  </div></div>
+                    <div class="col"><div class="quantity">                    
+                    <button class="btn btn-outline-danger" type="button" onclick="decrementpickup()">-</button>
+                    <input class="qtyInput" type="number" id="qtyInputPICKUP" value="0" name="PICK_UP">
+                    <button class="btn btn-outline-success" type="button" onclick="incrementpickup()">+</button>
+                  </div></div>                  
+                  <div class="col">
+                    <div class="keterangan">Bus Kecil</div>
+                  </div>
+                  <div class="col">
+                    <div class="keterangan">Truk Sedang</div>
+                  </div>
+                  <div class="col"><div class="quantity">
+                    <button class="btn btn-outline-danger" type="button" onclick="decrementBUS_KECIL()">-</button>
+                    <input class="qtyInput" type="number" id="qtyInputBUS_KECIL" value="0" name="BUS_KECIL">
+                    <button class="btn btn-outline-success" type="button" onclick="incrementBUS_KECIL()">+</button>
+                  </div></div>
+                  <div class="col"><div class="quantity">
+                    <button class="btn btn-outline-danger" type="button" onclick="decrementTRUK_KECIL()">-</button>
+                    <input class="qtyInput" type="number" id="qtyInputTRUK_KECIL" value="0" name="TRUK_KECIL">
+                    <button class="btn btn-outline-success" type="button" onclick="incrementTRUK_KECIL()">+</button>
+                  </div></div>
+                  <div class="col">
+                    <div class="keterangan">Bus Besar</div>
+                  </div>
+                  <div class="col">
+                    <div class="keterangan">Truk Besar</div>
+                  </div>
+                  <div class="col"><div class="quantity">
+                    <button class="btn btn-outline-danger" type="button" onclick="decrementBUS_BESAR()">-</button>
+                    <input class="qtyInput" type="number" id="qtyInputBUS_BESAR" value="0" name="BUS_BESAR">
+                    <button class="btn btn-outline-success" type="button" onclick="incrementBUS_BESAR()">+</button>
+                  </div></div>
+                  <div class="col"><div class="quantity">
+                    <button class="btn btn-outline-danger" type="button" onclick="decrementTRUK_BESAR()">-</button>
+                    <input class="qtyInput" type="number" id="qtyInputTRUK_BESAR" value="0" name="TRUK_BESAR">
+                    <button class="btn btn-outline-success" type="button" onclick="incrementTRUK_BESAR()">+</button>
+                  </div></div>
+                  <div class="col">
+                    <div class="keterangan">UM</div>
+                  </div>
+                  <div class="col">
+                    <div class="keterangan">Bus Sedang</div>
+                  </div>
+                  <div class="col"><div class="quantity">
+                    <button class="btn btn-outline-danger" type="button" onclick="decrementUM()">-</button>
+                    <input class="qtyInput" type="number" id="qtyInputUM" value="0" name="BUS_UM">
+                    <button class="btn btn-outline-success" type="button" onclick="incrementUM()">+</button>
+                  </div></div>
+                  <div class="col"><div class="quantity">
+                    <button class="btn btn-outline-danger" type="button" onclick="decrementBUS_SDG()">-</button>
+                    <input class="qtyInput" type="number" id="qtyInputBUS_SDG" value="0" name="BUS_SDG">
+                    <button class="btn btn-outline-success" type="button" onclick="incrementBUS_SDG()">+</button>
+                  </div></div>                  
+                  <div class="col">
+                    <div class="keterangan">Truk Gandeng</div>
+                  </div>
+                  <div class="col">
+                    <div class="keterangan"></div>
+                  </div>
+                  <div class="col"><div class="quantity">
+                    <button class="btn btn-outline-danger" type="button" onclick="decrementTRUK_GDG()">-</button>
+                    <input class="qtyInput" type="number" id="qtyInputTRUK_GDG" value="0" name="TRUK_GDG">
+                    <button class="btn btn-outline-success" type="button" onclick="incrementTRUK_GDG()">+</button>
+                  </div></div>
+                  <div class="col"></div>
+                </div>
+              </div>
+          <script src="../java/tcbaros.js">
+          </script>
+          <div class="counter2">
+            <div class="modal fade" id="exampleModalToggle" aria-hidden="true" aria-labelledby="exampleModalToggleLabel" tabindex="-1">
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalToggleLabel">Mengirim Data Kendaraan</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                  <i id="msg"></i><br>
+                    Apakah Data Kendaraan Yang direkap Sudah Benar?
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-dark" data-bs-target="#exampleModalToggle2" data-bs-toggle="modal">Ya</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="modal fade" id="exampleModalToggle2" aria-hidden="true" aria-labelledby="exampleModalToggleLabel2" tabindex="-1">
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalToggleLabel2">Mengirim Data Kendaraan</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    Mengirim data kendaraan membutuhkan waktu beberapa detik, Harap Tunggu !
+                  </div>
+                  <div class="modal-footer">
+                    <button type="submit" class="btn btn-dark" data-bs-toggle="modal">Mengirim Data</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <button type="button" class="btn btn-dark btn-lg" data-bs-target="#exampleModalToggle" data-bs-toggle="modal">Mengirim Data Kendaraan</button>
+        </div>
+        <nav style="background-color: #ffffff;">
+          <div class="text-center">
+          <div class="container">
+            <img src="../logo_black.png" width="35">
+          </div>
+        </div>
+      </nav>
+    </form>
+</body>
+<script>
+  let UserCreds = JSON.parse(sessionStorage.getItem("user-creds"));
+  let UserInfo = JSON.parse(sessionStorage.getItem("user-info"));
+  let SignoutBtn = document.getElementById('signoutbutton');
+  let MsgHead = document.getElementById('msg');  
+  let MsgtextHead = document.getElementById('msgtext');
+  
+  let Signout = ()=>{
+    sessionStorage.removeItem("user-creds");
+    sessionStorage.removeItem("user-info");
+    window.location.href = "../home.html"
+  }
+
+  let CheckCreds =  ()=>{
+    if (!sessionStorage.getItem("user-creds"))
+    window.location.href = "../home.html"
+    else{
+      MsgHead.innerHTML = `<input type="text" name="SURVEYOR" readonly value="${UserInfo.firstname} ${UserInfo.lastname}" style="text-align: center; border:none;">`;
+      MsgtextHead.innerText = `${UserInfo.firstname}`;
+    }
+  }
+
+  window.addEventListener('load', CheckCreds);
+  SignoutBtn.addEventListener('click', Signout);
+</script>
+</html>
